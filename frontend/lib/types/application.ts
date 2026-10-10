@@ -1,37 +1,66 @@
 export const APPLICATION_STATUSES = [
   "NEW",
   "PENDING_REVIEW",
-  "CONTRACT_GENERATED",
   "ACCEPTED",
   "REJECTED",
 ] as const;
 
 export type ApplicationStatus = (typeof APPLICATION_STATUSES)[number];
 
-export type Application = {
+export type Institution = {
   id: string;
-  applicant_name: string;
-  birth_date: string;
-  phone: string;
-  email: string;
-  course_name: string;
-  status: ApplicationStatus;
-  admin_notes: string | null;
+  name: string;
+  slug: string;
   created_at: string;
   updated_at: string;
 };
 
-export type ApplicationDocument = {
+export type Program = {
+  id: string;
+  institution_id: string;
+  name: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type RequirementProfile = {
+  id: string;
+  institution_id: string;
+  name: string;
+  source_reference: string;
+  verification_status: "UNVERIFIED" | "VERIFIED" | "RETIRED";
+  created_at: string;
+  updated_at: string;
+};
+
+export type StatusHistoryEntry = {
   id: string;
   application_id: string;
-  doc_type: "QUESTIONNAIRE" | "CONTRACT";
-  file_path: string;
+  from_status: ApplicationStatus | null;
+  to_status: ApplicationStatus;
+  note: string | null;
+  changed_by_id: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type Application = {
+  id: string;
+  program_id: string;
+  requirement_profile_id: string;
+  applicant_name: string;
+  birth_date: string;
+  phone: string;
+  email: string;
+  status: ApplicationStatus;
   created_at: string;
   updated_at: string;
 };
 
 export type ApplicationDetail = Application & {
-  documents: ApplicationDocument[];
+  admin_notes: string | null;
+  status_history: StatusHistoryEntry[];
 };
 
 export type ApplicationListResponse = {
@@ -41,11 +70,24 @@ export type ApplicationListResponse = {
   offset: number;
 };
 
-export const CONTRACT_ELIGIBLE_STATUSES: readonly ApplicationStatus[] = [
-  "NEW",
-  "PENDING_REVIEW",
-];
+export type ApplicationCreatedResponse = {
+  id: string;
+  status: ApplicationStatus;
+};
 
-export function canGenerateContract(status: ApplicationStatus): boolean {
-  return CONTRACT_ELIGIBLE_STATUSES.includes(status);
-}
+export type DocumentMetadata = {
+  id: string;
+  application_id: string;
+  template_key: string;
+  template_version: string;
+  generation_status: "SUCCESS" | "FAILED";
+  error_code: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type TokenResponse = {
+  access_token: string;
+  token_type: string;
+  expires_in: number;
+};

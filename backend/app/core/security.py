@@ -1,46 +1,60 @@
 from datetime import UTC, datetime, timedelta
-from typing import Any
+from uuid import UUID
 
-import bcrypt
 import jwt
+from argon2 import PasswordHasher
+from argon2.exceptions import InvalidHashError, VerifyMismatchError
+from jwt.exceptions import InvalidTokenError
 
-from app.core.config import settings
+from app.core.config import get_settings
+
+_hasher = PasswordHasher()
+_TIMING_DUMMY_HASH = _hasher.hash("eduflow-unused-timing-dummy")
+
+JWT_ALGORITHM = "HS256"
+JWT_TOKEN_TYPE = "access"
 
 
 def hash_password(password: str) -> str:
-    """Hash a plaintext password using bcrypt."""
-    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+    return _hasher.hash(password)
 
 
-def verify_password(password: str, hashed_password: str) -> bool:
-    """Return True if the plaintext password matches the stored hash."""
-    return bcrypt.checkpw(
-        password.encode("utf-8"),
-        hashed_password.encode("utf-8"),
-    )
+def verify_password(password: str, hashed_password: str | None) -> bool:
+    """Verify a password. Uses a dummy hash when the account is missing."""
+    target = hashed_password or _TIMING_DUMMY_HASH
+    try:
+        return _hasher.verify(target, password)
+    except (VerifyMismatchError, InvalidHashError):
+        return False
 
 
-def create_access_token(
-    subject: str,
-    expires_delta: timedelta | None = None,
-    extra_claims: dict[str, Any] | None = None,
-) -> str:
-    """Create a signed JWT access token."""
-    expire = datetime.now(UTC) + (
-        expires_delta
-        if expires_delta is not None
-        else timedelta(minutes=settings.access_token_expire_minutes)
-    )
-    payload: dict[str, Any] = {"sub": subject, "exp": expire}
-    if extra_claims:
-        payload.update(extra_claims)
-    return jwt.encode(payload, settings.secret_key, algorithm=settings.algorithm)
+def create_access_token(*, subject: UUID, expires_delta: timedelta | None = None) -> str:
+    settings = get_settings()
+    lifetime = expires_delta or timedelta(minutes=settings.access_token_expire_minutes)
+    now = datetime.now(UTC)
+    payload = {
+        "sub": str(subject),
+        "typ": JWT_TOKEN_TYPE,
+        "iat": now,
+        "exp": now + lifetime,
+    }
+    return jwt.encode(payload, settings.secret_key, algorithm=JWT_ALGORITHM)
 
 
-def decode_access_token(token: str) -> dict[str, Any]:
-    """Decode and validate a JWT access token."""
-    return jwt.decode(
-        token,
-        settings.secret_key,
-        algorithms=[settings.algorithm],
-    )
+def decode_access_token(token: str) -> UUID:
+    settings = get_settings()
+    try:
+        payload = jwt.decode(
+            token,
+            settings.secret_key,
+            algorithms=[JWT_ALGORITHM],
+            options={"require": ["exp", "sub", "typ"]},
+        )
+    except InvalidTokenError as exc:
+        raise ValueError("Invalid access token") from exc
+    if payload.get("typ") != JWT_TOKEN_TYPE:
+        raise ValueError("Invalid access token")
+    try:
+        return UUID(str(payload["sub"]))
+    except (KeyError, TypeError, ValueError) as exc:
+        raise ValueError("Invalid access token") from exc

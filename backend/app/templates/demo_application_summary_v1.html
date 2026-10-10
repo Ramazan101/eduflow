@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Demo application summary</title>
+    <style>
+      @page {
+        size: A4;
+        margin: 22mm 18mm 24mm 18mm;
+        @top-center {
+          content: "DEMO — NOT A LEGAL DOCUMENT — NOT FOR SIGNING";
+          font-family: "DejaVu Sans", sans-serif;
+          font-size: 9pt;
+          color: #7a1f1f;
+          letter-spacing: 0.04em;
+        }
+        @bottom-center {
+          content: "Template {{ template_version }} · Demo only · Page " counter(page);
+          font-family: "DejaVu Sans", sans-serif;
+          font-size: 8pt;
+          color: #4b5563;
+        }
+      }
+      body {
+        font-family: "DejaVu Sans", Arial, Helvetica, sans-serif;
+        color: #1f2933;
+        font-size: 11pt;
+        line-height: 1.45;
+      }
+      .banner {
+        border: 2px solid #7a1f1f;
+        background: #fdecec;
+        color: #7a1f1f;
+        font-weight: 700;
+        text-align: center;
+        padding: 12px 14px;
+        margin: 0 0 18px;
+        letter-spacing: 0.03em;
+      }
+      h1 {
+        font-size: 18pt;
+        margin: 0 0 8px;
+      }
+      .lede {
+        color: #4b5563;
+        margin: 0 0 18px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 12px 0 18px;
+      }
+      th,
+      td {
+        border: 1px solid #d5dde5;
+        padding: 8px 10px;
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        width: 34%;
+        background: #f4f7fa;
+        font-weight: 600;
+      }
+      .notice {
+        border-left: 4px solid #7a1f1f;
+        padding: 8px 12px;
+        background: #fff8f8;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="banner">DEMO — NOT A LEGAL DOCUMENT — NOT FOR SIGNING</div>
+    <h1>Application summary</h1>
+    <p class="lede">
+      This file is a demonstration printout of an EduFlow application record.
+      It is not an offer, contract, enrollment confirmation, payment receipt,
+      or signed agreement.
+    </p>
+    <table>
+      <tr>
+        <th>Application ID</th>
+        <td>{{ application_id }}</td>
+      </tr>
+      <tr>
+        <th>Applicant name</th>
+        <td>{{ applicant_name }}</td>
+      </tr>
+      <tr>
+        <th>Date of birth</th>
+        <td>{{ birth_date }}</td>
+      </tr>
+      <tr>
+        <th>Phone</th>
+        <td>{{ phone }}</td>
+      </tr>
+      <tr>
+        <th>Email</th>
+        <td>{{ email }}</td>
+      </tr>
+      <tr>
+        <th>Institution</th>
+        <td>{{ institution_name }}</td>
+      </tr>
+      <tr>
+        <th>Program</th>
+        <td>{{ program_name }}</td>
+      </tr>
+      <tr>
+        <th>Requirement profile</th>
+        <td>{{ requirement_profile_name }}</td>
+      </tr>
+      <tr>
+        <th>Application status</th>
+        <td>{{ application_status }}</td>
+      </tr>
+      <tr>
+        <th>Generated at (UTC)</th>
+        <td>{{ generated_at }}</td>
+      </tr>
+      <tr>
+        <th>Template version</th>
+        <td>{{ template_key }} {{ template_version }}</td>
+      </tr>
+    </table>
+    <p class="notice">
+      {{ disclaimer }} Generating this PDF does not approve the application,
+      enroll the applicant, record a payment, or capture a signature.
+      There is no signature block on this document.
+    </p>
+  </body>
+</html>

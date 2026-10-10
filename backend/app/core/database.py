@@ -7,15 +7,21 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
-from app.core.config import settings
+from app.core.config import get_settings
 
-engine: AsyncEngine = create_async_engine(
-    settings.database_url,
-    echo=settings.debug,
-    pool_pre_ping=True,
-    pool_size=5,
-    max_overflow=10,
-)
+
+def create_engine() -> AsyncEngine:
+    settings = get_settings()
+    return create_async_engine(
+        settings.database_url,
+        echo=False,
+        pool_pre_ping=True,
+        pool_size=5,
+        max_overflow=10,
+    )
+
+
+engine: AsyncEngine = create_engine()
 
 AsyncSessionLocal = async_sessionmaker(
     bind=engine,
@@ -27,6 +33,6 @@ AsyncSessionLocal = async_sessionmaker(
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
-    """Yield an async database session for request-scoped usage."""
+    """Yield a request-scoped session. Callers must commit explicitly."""
     async with AsyncSessionLocal() as session:
         yield session

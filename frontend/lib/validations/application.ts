@@ -1,10 +1,8 @@
 import { z } from "zod";
 
-import { COURSE_OPTIONS } from "@/lib/courses";
-
 export const PHONE_PATTERN = /^\+[1-9]\d{7,14}$/;
 
-export const applicationSchema = z.object({
+export const applicationDetailsSchema = z.object({
   applicant_name: z
     .string()
     .trim()
@@ -13,7 +11,10 @@ export const applicationSchema = z.object({
   phone: z
     .string()
     .trim()
-    .regex(PHONE_PATTERN, "Enter a valid international phone number, e.g. +77011234567"),
+    .regex(
+      PHONE_PATTERN,
+      "Enter a valid international phone number, e.g. +77011234567",
+    ),
   email: z.string().trim().email("Enter a valid email address"),
   birth_date: z
     .string()
@@ -25,13 +26,13 @@ export const applicationSchema = z.object({
       today.setHours(0, 0, 0, 0);
       return selected <= today;
     }, "Birth date cannot be in the future"),
-  course_name: z
-    .string()
-    .min(1, "Select a course")
-    .refine(
-      (value) => (COURSE_OPTIONS as readonly string[]).includes(value),
-      "Select a valid programme",
-    ),
 });
 
-export type ApplicationFormValues = z.infer<typeof applicationSchema>;
+export type ApplicationDetailsValues = z.infer<typeof applicationDetailsSchema>;
+
+export const loginSchema = z.object({
+  email: z.string().trim().email("Enter a valid work email"),
+  password: z.string().min(1, "Password is required"),
+});
+
+export type LoginValues = z.infer<typeof loginSchema>;

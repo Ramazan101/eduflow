@@ -1,1 +1,1 @@
-"""Core configuration, database, and security utilities."""
+"""Configuration, database, and HTTP error handling."""

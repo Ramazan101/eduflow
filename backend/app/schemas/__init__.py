@@ -1,27 +1,40 @@
 from app.schemas.application import (
     ApplicationCreate,
     ApplicationCreatedResponse,
-    ApplicationDetailResponse,
     ApplicationListResponse,
     ApplicationResponse,
-    ApplicationStatusUpdate,
-    ApplicationUpdate,
+    ApplicationStatusChange,
+    ApplicationStatusResponse,
+    StatusHistoryResponse,
 )
-from app.schemas.document import DocumentCreate, DocumentResponse, DocumentUpdate
-from app.schemas.user import UserCreate, UserResponse, UserUpdate
+from app.schemas.auth import LoginRequest, TokenResponse
+from app.schemas.document import DocumentMetadataResponse
+from app.schemas.institution import InstitutionCreate, InstitutionResponse
+from app.schemas.program import ProgramCreate, ProgramResponse
+from app.schemas.requirement_profile import (
+    RequirementProfileCreate,
+    RequirementProfilePublicResponse,
+    RequirementProfileResponse,
+    RequirementProfileVerify,
+)
 
 __all__ = [
     "ApplicationCreate",
     "ApplicationCreatedResponse",
-    "ApplicationDetailResponse",
     "ApplicationListResponse",
     "ApplicationResponse",
-    "ApplicationStatusUpdate",
-    "ApplicationUpdate",
-    "DocumentCreate",
-    "DocumentResponse",
-    "DocumentUpdate",
-    "UserCreate",
-    "UserResponse",
-    "UserUpdate",
+    "ApplicationStatusChange",
+    "ApplicationStatusResponse",
+    "DocumentMetadataResponse",
+    "InstitutionCreate",
+    "InstitutionResponse",
+    "LoginRequest",
+    "ProgramCreate",
+    "ProgramResponse",
+    "RequirementProfileCreate",
+    "RequirementProfilePublicResponse",
+    "RequirementProfileResponse",
+    "RequirementProfileVerify",
+    "StatusHistoryResponse",
+    "TokenResponse",
 ]

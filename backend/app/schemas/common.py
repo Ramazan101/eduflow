@@ -4,7 +4,6 @@ from typing import Annotated
 
 from pydantic import BaseModel, ConfigDict, Field
 
-# E.164: '+' followed by 8–15 digits, first digit non-zero.
 PHONE_NUMBER_PATTERN = r"^\+[1-9]\d{7,14}$"
 
 PhoneNumber = Annotated[
@@ -14,7 +13,7 @@ PhoneNumber = Annotated[
         min_length=9,
         max_length=16,
         examples=["+77011234567"],
-        description="E.164 phone number, e.g. +77011234567",
+        description="E.164 phone number",
     ),
 ]
 

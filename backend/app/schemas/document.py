@@ -1,23 +1,12 @@
 import uuid
 
-from pydantic import Field
-
-from app.models.enums import DocumentType
-from app.schemas.common import StrictModel, TimestampedResponse
+from app.models.enums import DocumentGenerationStatus
+from app.schemas.common import TimestampedResponse
 
 
-class DocumentCreate(StrictModel):
+class DocumentMetadataResponse(TimestampedResponse):
     application_id: uuid.UUID
-    doc_type: DocumentType
-    file_path: str = Field(min_length=1, max_length=1024)
-
-
-class DocumentUpdate(StrictModel):
-    doc_type: DocumentType | None = None
-    file_path: str | None = Field(default=None, min_length=1, max_length=1024)
-
-
-class DocumentResponse(TimestampedResponse):
-    application_id: uuid.UUID
-    doc_type: DocumentType
-    file_path: str
+    template_key: str
+    template_version: str
+    generation_status: DocumentGenerationStatus
+    error_code: str | None
