@@ -1,0 +1,1 @@
+"""EduFlow backend application package."""
