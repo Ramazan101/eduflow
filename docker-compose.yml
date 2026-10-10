@@ -1,0 +1,50 @@
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: eduflow
+      POSTGRES_PASSWORD: eduflow
+      POSTGRES_DB: eduflow
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U eduflow -d eduflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      POSTGRES_USER: eduflow
+      POSTGRES_PASSWORD: eduflow
+      POSTGRES_DB: eduflow
+      DATABASE_URL: postgresql+asyncpg://eduflow:eduflow@db:5432/eduflow
+      SECRET_KEY: change-me-in-production
+      DEBUG: "false"
+    ports:
+      - "8000:8000"
+    volumes:
+      - backend_storage:/app/storage/documents
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8000
+    depends_on:
+      - backend
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    ports:
+      - "3000:3000"
+
+volumes:
+  postgres_data:
+  backend_storage:

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Training Services Agreement</title>
+    <style>
+      @page {
+        size: A4;
+        margin: 18mm 16mm 20mm 16mm;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Liberation Serif", "Times New Roman", Times, serif;
+        color: #1a1f2b;
+        font-size: 11.5pt;
+        line-height: 1.45;
+      }
+      .letterhead {
+        border-bottom: 3px solid #0f3d5e;
+        padding-bottom: 12px;
+        margin-bottom: 22px;
+      }
+      .brand {
+        font-family: "Liberation Sans", Arial, Helvetica, sans-serif;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #0f3d5e;
+        font-size: 13pt;
+        font-weight: 700;
+        margin: 0;
+      }
+      .company {
+        font-family: "Liberation Sans", Arial, Helvetica, sans-serif;
+        font-size: 18pt;
+        font-weight: 700;
+        margin: 4px 0 6px;
+      }
+      .meta {
+        font-family: "Liberation Sans", Arial, Helvetica, sans-serif;
+        font-size: 9pt;
+        color: #4b5563;
+      }
+      h1 {
+        font-family: "Liberation Sans", Arial, Helvetica, sans-serif;
+        font-size: 16pt;
+        text-align: center;
+        margin: 18px 0 6px;
+        color: #0f3d5e;
+      }
+      .subtitle {
+        text-align: center;
+        font-style: italic;
+        color: #4b5563;
+        margin-bottom: 22px;
+      }
+      h2 {
+        font-family: "Liberation Sans", Arial, Helvetica, sans-serif;
+        font-size: 12pt;
+        color: #0f3d5e;
+        margin: 18px 0 8px;
+        border-bottom: 1px solid #d5dde5;
+        padding-bottom: 3px;
+      }
+      p {
+        margin: 0 0 10px;
+      }
+      .facts {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 12px 0 16px;
+      }
+      .facts th,
+      .facts td {
+        border: 1px solid #cfd8e3;
+        padding: 7px 10px;
+        text-align: left;
+        vertical-align: top;
+      }
+      .facts th {
+        width: 32%;
+        background: #f3f6f9;
+        font-family: "Liberation Sans", Arial, Helvetica, sans-serif;
+        font-size: 10pt;
+        font-weight: 700;
+      }
+      .clause {
+        margin-bottom: 8px;
+      }
+      .signatures {
+        width: 100%;
+        margin-top: 36px;
+        border-collapse: collapse;
+      }
+      .signatures td {
+        width: 50%;
+        vertical-align: top;
+        padding: 8px 18px 8px 0;
+      }
+      .sign-line {
+        border-bottom: 1px solid #1a1f2b;
+        height: 42px;
+        margin: 28px 0 6px;
+      }
+      .sign-label {
+        font-family: "Liberation Sans", Arial, Helvetica, sans-serif;
+        font-size: 9pt;
+        color: #4b5563;
+      }
+      .footer {
+        margin-top: 28px;
+        font-size: 8.5pt;
+        color: #6b7280;
+        font-family: "Liberation Sans", Arial, Helvetica, sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="letterhead">
+      <p class="brand">EduFlow</p>
+      <p class="company">Northstar Education Group LLC</p>
+      <p class="meta">
+        1200 Market Street, Suite 400, Wilmington, DE 19801<br />
+        B2B Training &amp; Student Onboarding &nbsp;|&nbsp; contracts@northstar-edu.example
+        &nbsp;|&nbsp; +1 (302) 555-0148
+      </p>
+    </header>
+
+    <h1>Professional Training Services Agreement</h1>
+    <p class="subtitle">Corporate student onboarding contract</p>
+
+    <table class="facts">
+      <tr>
+        <th>Agreement date</th>
+        <td>{{ current_date }}</td>
+      </tr>
+      <tr>
+        <th>Student (Applicant)</th>
+        <td>{{ applicant_name }}</td>
+      </tr>
+      <tr>
+        <th>Date of birth</th>
+        <td>{{ birth_date }}</td>
+      </tr>
+      <tr>
+        <th>Phone</th>
+        <td>{{ phone }}</td>
+      </tr>
+      <tr>
+        <th>Programme / Course</th>
+        <td>{{ course_name }}</td>
+      </tr>
+    </table>
+
+    <h2>1. Parties</h2>
+    <p class="clause">
+      This Training Services Agreement (the &ldquo;Agreement&rdquo;) is entered into
+      as of {{ current_date }} by and between <strong>Northstar Education Group LLC</strong>
+      (&ldquo;Provider&rdquo;) and <strong>{{ applicant_name }}</strong> (&ldquo;Student&rdquo;).
+    </p>
+
+    <h2>2. Scope of services</h2>
+    <p class="clause">
+      Provider shall deliver the professional training programme titled
+      <strong>{{ course_name }}</strong>, including instructional materials, assessments,
+      and onboarding support reasonably required for completion of the course.
+    </p>
+
+    <h2>3. Student representations</h2>
+    <p class="clause">
+      Student represents that the personal details provided in this Agreement
+      (name, date of birth {{ birth_date }}, and phone {{ phone }}) are accurate,
+      and that Student will promptly notify Provider of any change to those details.
+    </p>
+
+    <h2>4. Fees and payment</h2>
+    <p class="clause">
+      Course fees, payment schedule, and any employer sponsorship terms shall be
+      set out in an order form or invoice issued by Provider. Access to the
+      programme may be withheld until applicable fees are received.
+    </p>
+
+    <h2>5. Intellectual property</h2>
+    <p class="clause">
+      All course content, documentation, and related materials remain the exclusive
+      property of Provider or its licensors. Student receives a limited,
+      non-transferable licence to use the materials solely for personal training
+      during the term of the programme.
+    </p>
+
+    <h2>6. Confidentiality</h2>
+    <p class="clause">
+      Each party shall keep confidential any non-public business or personal
+      information obtained in connection with this Agreement, except where
+      disclosure is required by law.
+    </p>
+
+    <h2>7. Term and termination</h2>
+    <p class="clause">
+      This Agreement remains in effect until the course is completed or until
+      terminated in writing by either party for material breach that remains
+      uncured for fifteen (15) days after notice.
+    </p>
+
+    <h2>8. Governing law</h2>
+    <p class="clause">
+      This Agreement is governed by the laws of the State of Delaware, without
+      regard to conflict-of-law principles.
+    </p>
+
+    <p>
+      IN WITNESS WHEREOF, the parties have executed this Agreement as of the date
+      first written above.
+    </p>
+
+    <table class="signatures">
+      <tr>
+        <td>
+          <strong>Provider</strong><br />
+          Northstar Education Group LLC
+          <div class="sign-line"></div>
+          <div class="sign-label">Authorized representative signature</div>
+          <div class="sign-line"></div>
+          <div class="sign-label">Name / title / date</div>
+        </td>
+        <td>
+          <strong>Student</strong><br />
+          {{ applicant_name }}
+          <div class="sign-line"></div>
+          <div class="sign-label">Student signature</div>
+          <div class="sign-line"></div>
+          <div class="sign-label">Printed name / date</div>
+        </td>
+      </tr>
+    </table>
+
+    <p class="footer">
+      This document was generated by EduFlow for onboarding purposes and does not
+      constitute legal advice. Template reference: NSG-B2B-TRN-001.
+    </p>
+  </body>
+</html>

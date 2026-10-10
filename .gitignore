@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+*.egg-info/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+backend/storage/documents/*
+!backend/storage/documents/.gitkeep
