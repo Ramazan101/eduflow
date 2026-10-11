@@ -15,9 +15,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "EduFlow — Student Application",
-  description:
-    "Apply to EduFlow professional training programmes. Submit your details and receive a training contract.",
+  title: "EduFlow",
+  description: "Student admissions workspace for institutions and applicants.",
 };
 
 export default function RootLayout({
@@ -28,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-slate-50 font-sans text-slate-900 antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-[var(--paper)] font-sans text-[var(--ink)] antialiased`}
       >
         {children}
       </body>

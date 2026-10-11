@@ -1,19 +1,19 @@
+import uuid
 from datetime import date
-from uuid import UUID
 
 from pydantic import EmailStr, Field, field_validator
 
 from app.models.enums import ApplicationStatus
-from app.schemas.common import PhoneNumber, StrictModel, TimestampedResponse
-from app.schemas.document import DocumentResponse
+from app.schemas.common import ORMModel, PhoneNumber, StrictModel, TimestampedResponse
 
 
 class ApplicationCreate(StrictModel):
+    program_id: uuid.UUID
+    requirement_profile_id: uuid.UUID
     applicant_name: str = Field(min_length=1, max_length=255)
     birth_date: date
     phone: PhoneNumber
     email: EmailStr
-    course_name: str = Field(min_length=1, max_length=255)
 
     @field_validator("birth_date")
     @classmethod
@@ -23,48 +23,54 @@ class ApplicationCreate(StrictModel):
         return value
 
 
-class ApplicationUpdate(StrictModel):
-    applicant_name: str | None = Field(default=None, min_length=1, max_length=255)
-    birth_date: date | None = None
-    phone: PhoneNumber | None = None
-    email: EmailStr | None = None
-    course_name: str | None = Field(default=None, min_length=1, max_length=255)
-    status: ApplicationStatus | None = None
-    admin_notes: str | None = None
-
-    @field_validator("birth_date")
-    @classmethod
-    def birth_date_not_in_future(cls, value: date | None) -> date | None:
-        if value is not None and value > date.today():
-            raise ValueError("birth_date cannot be in the future")
-        return value
-
-
-class ApplicationStatusUpdate(StrictModel):
+class ApplicationStatusChange(StrictModel):
     status: ApplicationStatus
-    admin_notes: str | None = None
+    note: str | None = Field(default=None, max_length=2000)
 
 
 class ApplicationCreatedResponse(StrictModel):
-    id: UUID
+    id: uuid.UUID
+    status: ApplicationStatus
 
 
-class ApplicationResponse(TimestampedResponse):
+class StatusHistoryResponse(TimestampedResponse):
+    application_id: uuid.UUID
+    from_status: ApplicationStatus | None
+    to_status: ApplicationStatus
+    note: str | None
+    changed_by_id: uuid.UUID | None
+
+
+class ApplicationStatusResponse(ORMModel):
+    id: uuid.UUID
+    status: ApplicationStatus
+    status_history: list[StatusHistoryResponse] = Field(default_factory=list)
+
+
+class ApplicationListItem(TimestampedResponse):
+    program_id: uuid.UUID
+    requirement_profile_id: uuid.UUID
     applicant_name: str
     birth_date: date
     phone: PhoneNumber
     email: EmailStr
-    course_name: str
     status: ApplicationStatus
-    admin_notes: str | None
-
-
-class ApplicationDetailResponse(ApplicationResponse):
-    documents: list[DocumentResponse] = Field(default_factory=list)
 
 
 class ApplicationListResponse(StrictModel):
-    items: list[ApplicationResponse]
+    items: list[ApplicationListItem]
     total: int
     limit: int
     offset: int
+
+
+class ApplicationResponse(TimestampedResponse):
+    program_id: uuid.UUID
+    requirement_profile_id: uuid.UUID
+    applicant_name: str
+    birth_date: date
+    phone: PhoneNumber
+    email: EmailStr
+    status: ApplicationStatus
+    admin_notes: str | None
+    status_history: list[StatusHistoryResponse] = Field(default_factory=list)

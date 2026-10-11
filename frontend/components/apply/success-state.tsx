@@ -1,63 +1,51 @@
-import { Check, Clock3, FileText, Mail } from "lucide-react";
-import type { ReactNode } from "react";
+import { STATUS_LABELS, applicantNextStep } from "@/lib/status";
+import type { ApplicationCreatedResponse } from "@/lib/types/application";
 
-export function SuccessState() {
+type SuccessStateProps = {
+  result: ApplicationCreatedResponse;
+  onReset: () => void;
+};
+
+export function SuccessState({ result, onReset }: SuccessStateProps) {
   return (
     <div
-      className="rounded-2xl border border-teal-100 bg-white p-8 shadow-card sm:p-10"
+      className="rounded-xl border border-[var(--line)] bg-[#fffcf7] p-8 shadow-sm sm:p-10"
       role="status"
       aria-live="polite"
     >
-      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-sky-500 to-teal-500 text-white shadow-sm">
-        <Check className="h-7 w-7" strokeWidth={2.5} aria-hidden />
-      </div>
-      <h2 className="mt-6 text-center text-2xl font-semibold tracking-tight text-slate-900">
+      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
+        Submitted
+      </p>
+      <h2 className="mt-2 text-2xl font-semibold tracking-tight">
         Application received
       </h2>
-      <p className="mx-auto mt-3 max-w-md text-center text-sm leading-6 text-slate-600">
-        Your application has been received. We will prepare your contract
-        shortly.
+      <p className="mt-3 text-sm leading-6 text-[var(--muted)]">
+        The registrar has your file. A PDF is not generated at this step, and
+        this confirmation is not an offer of admission.
       </p>
 
-      <ol className="mt-8 space-y-3">
-        <NextStep
-          icon={<Mail className="h-4 w-4" />}
-          title="Confirmation"
-          description="Our admissions team reviews your details."
-        />
-        <NextStep
-          icon={<FileText className="h-4 w-4" />}
-          title="Contract"
-          description="A training agreement PDF is generated for signature."
-        />
-        <NextStep
-          icon={<Clock3 className="h-4 w-4" />}
-          title="Onboarding"
-          description="Once accepted, you receive course access and next steps."
-        />
-      </ol>
-    </div>
-  );
-}
+      <dl className="mt-6 grid gap-3 rounded-lg border border-[var(--line)] bg-white px-4 py-4 text-sm">
+        <div className="flex justify-between gap-4">
+          <dt className="text-[var(--muted)]">Reference</dt>
+          <dd className="font-mono text-xs text-[var(--ink)]">{result.id}</dd>
+        </div>
+        <div className="flex justify-between gap-4">
+          <dt className="text-[var(--muted)]">Status</dt>
+          <dd className="font-medium">{STATUS_LABELS[result.status]}</dd>
+        </div>
+      </dl>
 
-function NextStep({
-  icon,
-  title,
-  description,
-}: {
-  icon: ReactNode;
-  title: string;
-  description: string;
-}) {
-  return (
-    <li className="flex gap-3 rounded-xl border border-slate-100 bg-slate-50/80 px-4 py-3">
-      <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-teal-700 shadow-sm ring-1 ring-slate-200/80">
-        {icon}
-      </span>
-      <div>
-        <p className="text-sm font-medium text-slate-900">{title}</p>
-        <p className="text-xs leading-5 text-slate-500">{description}</p>
-      </div>
-    </li>
+      <p className="mt-5 text-sm leading-6 text-[var(--ink)]">
+        {applicantNextStep(result.status)}
+      </p>
+
+      <button
+        type="button"
+        onClick={onReset}
+        className="mt-8 inline-flex text-sm font-medium text-[var(--accent)] underline-offset-4 hover:underline"
+      >
+        Start another application
+      </button>
+    </div>
   );
 }

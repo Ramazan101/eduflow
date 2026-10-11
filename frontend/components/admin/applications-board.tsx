@@ -8,14 +8,15 @@ import { ApplicationsTable } from "@/components/admin/applications-table";
 import { TableSkeleton } from "@/components/admin/table-skeleton";
 import {
   ApiError,
-  generateContract,
-  getApplication,
   listApplications,
+  listPrograms,
+  listRequirementProfiles,
 } from "@/lib/api";
 import type {
   Application,
-  ApplicationDetail,
   ApplicationStatus,
+  Program,
+  RequirementProfile,
 } from "@/lib/types/application";
 import { cn } from "@/lib/utils";
 
@@ -23,28 +24,42 @@ const PAGE_SIZE = 20;
 
 const STATUS_FILTERS: { label: string; value: ApplicationStatus | "ALL" }[] = [
   { label: "All", value: "ALL" },
-  { label: "New", value: "NEW" },
-  { label: "Pending", value: "PENDING_REVIEW" },
-  { label: "Contract", value: "CONTRACT_GENERATED" },
+  { label: "Received", value: "NEW" },
+  { label: "In review", value: "PENDING_REVIEW" },
   { label: "Accepted", value: "ACCEPTED" },
-  { label: "Rejected", value: "REJECTED" },
+  { label: "Not accepted", value: "REJECTED" },
 ];
+
+type Counts = {
+  total: number;
+  NEW: number;
+  PENDING_REVIEW: number;
+  ACCEPTED: number;
+  REJECTED: number;
+};
+
+const EMPTY_COUNTS: Counts = {
+  total: 0,
+  NEW: 0,
+  PENDING_REVIEW: 0,
+  ACCEPTED: 0,
+  REJECTED: 0,
+};
 
 export function ApplicationsBoard() {
   const [applications, setApplications] = useState<Application[]>([]);
+  const [programs, setPrograms] = useState<Program[]>([]);
+  const [profiles, setProfiles] = useState<RequirementProfile[]>([]);
+  const [counts, setCounts] = useState<Counts>(EMPTY_COUNTS);
   const [total, setTotal] = useState(0);
   const [offset, setOffset] = useState(0);
   const [statusFilter, setStatusFilter] = useState<ApplicationStatus | "ALL">(
     "ALL",
   );
+  const [programFilter, setProgramFilter] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [actionError, setActionError] = useState<string | null>(null);
-  const [generatingId, setGeneratingId] = useState<string | null>(null);
-  const [detailOpen, setDetailOpen] = useState(false);
-  const [detailLoading, setDetailLoading] = useState(false);
-  const [detailError, setDetailError] = useState<string | null>(null);
-  const [detail, setDetail] = useState<ApplicationDetail | null>(null);
+  const [detailId, setDetailId] = useState<string | null>(null);
 
   const load = useCallback(async (options?: { silent?: boolean }) => {
     if (!options?.silent) {
@@ -52,95 +67,81 @@ export function ApplicationsBoard() {
     }
     setError(null);
     try {
-      const data = await listApplications({
-        status: statusFilter === "ALL" ? undefined : statusFilter,
-        limit: PAGE_SIZE,
-        offset,
+      const [page, allPrograms, allProfiles, all, received, review, accepted, rejected] =
+        await Promise.all([
+          listApplications({
+            status: statusFilter === "ALL" ? undefined : statusFilter,
+            program_id: programFilter || undefined,
+            limit: PAGE_SIZE,
+            offset,
+          }),
+          listPrograms(),
+          listRequirementProfiles(),
+          listApplications({ limit: 1 }),
+          listApplications({ status: "NEW", limit: 1 }),
+          listApplications({ status: "PENDING_REVIEW", limit: 1 }),
+          listApplications({ status: "ACCEPTED", limit: 1 }),
+          listApplications({ status: "REJECTED", limit: 1 }),
+        ]);
+      setApplications(page.items);
+      setTotal(page.total);
+      setPrograms(allPrograms);
+      setProfiles(allProfiles);
+      setCounts({
+        total: all.total,
+        NEW: received.total,
+        PENDING_REVIEW: review.total,
+        ACCEPTED: accepted.total,
+        REJECTED: rejected.total,
       });
-      setApplications(data.items);
-      setTotal(data.total);
     } catch (err) {
       setApplications([]);
       setTotal(0);
+      setCounts(EMPTY_COUNTS);
       setError(
-        err instanceof ApiError
-          ? err.message
-          : "We could not load applications.",
+        err instanceof ApiError ? err.message : "We could not load applications.",
       );
     } finally {
       if (!options?.silent) {
         setLoading(false);
       }
     }
-  }, [offset, statusFilter]);
+  }, [offset, programFilter, statusFilter]);
 
   useEffect(() => {
     void load();
   }, [load]);
 
-  const openDetails = async (application: Application) => {
-    setDetailOpen(true);
-    setDetail(null);
-    setDetailError(null);
-    setDetailLoading(true);
-    try {
-      const data = await getApplication(application.id);
-      setDetail(data);
-    } catch (err) {
-      setDetailError(
-        err instanceof ApiError
-          ? err.message
-          : "We could not load this application.",
-      );
-    } finally {
-      setDetailLoading(false);
-    }
-  };
-
-  const handleGenerate = async (application: Application) => {
-    setActionError(null);
-    setGeneratingId(application.id);
-    try {
-      await generateContract(application.id);
-      await load({ silent: true });
-    } catch (err) {
-      setActionError(
-        err instanceof ApiError
-          ? err.message
-          : "We could not generate the contract.",
-      );
-    } finally {
-      setGeneratingId(null);
-    }
-  };
-
   const pageStart = total === 0 ? 0 : offset + 1;
   const pageEnd = Math.min(offset + PAGE_SIZE, total);
-  const canPrev = offset > 0;
-  const canNext = offset + PAGE_SIZE < total;
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-xl font-semibold tracking-tight text-slate-900">
-            Applications
-          </h1>
-          <p className="mt-1 text-sm text-slate-500">
-            Review incoming students and generate training contracts.
+          <h1 className="text-xl font-semibold tracking-tight">Applications</h1>
+          <p className="mt-1 text-sm text-[var(--muted)]">
+            Queue, history, and decisions from the live EduFlow API.
           </p>
         </div>
         <button
           type="button"
           onClick={() => void load()}
-          className="inline-flex items-center gap-1.5 self-start rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+          className="inline-flex items-center gap-1.5 self-start rounded-md border border-[var(--line)] bg-[#fffcf7] px-3 py-1.5 text-xs font-medium"
         >
           <RefreshCw className="h-3.5 w-3.5" aria-hidden />
           Refresh
         </button>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="grid gap-3 sm:grid-cols-4">
+        <Metric label="In queue" value={counts.total} />
+        <Metric label="Received" value={counts.NEW} />
+        <Metric label="In review" value={counts.PENDING_REVIEW} />
+        <Metric label="Decided" value={counts.ACCEPTED + counts.REJECTED} />
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
         {STATUS_FILTERS.map((filter) => {
           const active = statusFilter === filter.value;
           return (
@@ -152,39 +153,44 @@ export function ApplicationsBoard() {
                 setStatusFilter(filter.value);
               }}
               className={cn(
-                "rounded-full px-3 py-1 text-xs font-medium ring-1 transition",
+                "rounded-full px-3 py-1 text-xs font-medium ring-1",
                 active
-                  ? "bg-slate-900 text-white ring-slate-900"
-                  : "bg-white text-slate-600 ring-slate-200 hover:bg-slate-50",
+                  ? "bg-[var(--ink)] text-[#f7f4ee] ring-[var(--ink)]"
+                  : "bg-[#fffcf7] text-[var(--muted)] ring-[var(--line)]",
               )}
             >
               {filter.label}
             </button>
           );
         })}
-      </div>
-
-      {actionError ? (
-        <p
-          role="alert"
-          className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+        <select
+          aria-label="Filter by programme"
+          value={programFilter}
+          onChange={(event) => {
+            setOffset(0);
+            setProgramFilter(event.target.value);
+          }}
+          className="rounded-full border border-[var(--line)] bg-[#fffcf7] px-3 py-1 text-xs"
         >
-          {actionError}
-        </p>
-      ) : null}
+          <option value="">All programmes</option>
+          {programs.map((program) => (
+            <option key={program.id} value={program.id}>
+              {program.name}
+            </option>
+          ))}
+        </select>
+      </div>
 
       {loading ? (
         <TableSkeleton />
       ) : error ? (
-        <div className="rounded-xl border border-slate-200 bg-white px-6 py-12 text-center">
-          <p className="text-sm font-medium text-slate-900">
-            Couldn’t load applications
-          </p>
-          <p className="mt-1 text-sm text-slate-500">{error}</p>
+        <div className="rounded-xl border border-[var(--line)] bg-[#fffcf7] px-6 py-12 text-center">
+          <p className="text-sm font-medium">Couldn’t load applications</p>
+          <p className="mt-1 text-sm text-[var(--muted)]">{error}</p>
           <button
             type="button"
             onClick={() => void load()}
-            className="mt-4 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-white"
+            className="mt-4 rounded-md bg-[var(--ink)] px-3 py-1.5 text-xs font-medium text-[#f7f4ee]"
           >
             Try again
           </button>
@@ -193,30 +199,27 @@ export function ApplicationsBoard() {
         <>
           <ApplicationsTable
             applications={applications}
-            generatingId={generatingId}
-            onView={(application) => void openDetails(application)}
-            onGenerate={(application) => void handleGenerate(application)}
+            programs={programs}
+            onView={(application) => setDetailId(application.id)}
           />
-          <div className="flex items-center justify-between text-xs text-slate-500">
+          <div className="flex items-center justify-between text-xs text-[var(--muted)]">
             <p>
-              {total === 0
-                ? "0 applications"
-                : `${pageStart}–${pageEnd} of ${total}`}
+              {total === 0 ? "0 applications" : `${pageStart}–${pageEnd} of ${total}`}
             </p>
             <div className="flex gap-2">
               <button
                 type="button"
-                disabled={!canPrev}
+                disabled={offset <= 0}
                 onClick={() => setOffset((value) => Math.max(0, value - PAGE_SIZE))}
-                className="rounded-md border border-slate-200 bg-white px-2.5 py-1 font-medium text-slate-700 disabled:opacity-40"
+                className="rounded-md border border-[var(--line)] bg-[#fffcf7] px-2.5 py-1 font-medium disabled:opacity-40"
               >
                 Previous
               </button>
               <button
                 type="button"
-                disabled={!canNext}
+                disabled={offset + PAGE_SIZE >= total}
                 onClick={() => setOffset((value) => value + PAGE_SIZE)}
-                className="rounded-md border border-slate-200 bg-white px-2.5 py-1 font-medium text-slate-700 disabled:opacity-40"
+                className="rounded-md border border-[var(--line)] bg-[#fffcf7] px-2.5 py-1 font-medium disabled:opacity-40"
               >
                 Next
               </button>
@@ -226,12 +229,24 @@ export function ApplicationsBoard() {
       )}
 
       <ApplicationDetailModal
-        open={detailOpen}
-        loading={detailLoading}
-        error={detailError}
-        application={detail}
-        onClose={() => setDetailOpen(false)}
+        open={Boolean(detailId)}
+        applicationId={detailId}
+        programs={programs}
+        profiles={profiles}
+        onClose={() => setDetailId(null)}
+        onChanged={() => void load({ silent: true })}
       />
+    </div>
+  );
+}
+
+function Metric({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-xl border border-[var(--line)] bg-[#fffcf7] px-4 py-3">
+      <p className="text-[11px] font-medium uppercase tracking-wider text-[var(--muted)]">
+        {label}
+      </p>
+      <p className="mt-1 text-2xl font-semibold tabular-nums">{value}</p>
     </div>
   );
 }

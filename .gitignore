@@ -7,5 +7,6 @@ venv/
 .mypy_cache/
 .ruff_cache/
 .pytest_cache/
+.pgdata/
 backend/storage/documents/*
 !backend/storage/documents/.gitkeep

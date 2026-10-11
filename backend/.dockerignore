@@ -6,4 +6,9 @@ venv
 .pytest_cache
 .mypy_cache
 *.egg-info
+.cursor
+tests
+pytest.ini
+README.md
 storage/documents/*.pdf
+.git
